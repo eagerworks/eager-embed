@@ -1,6 +1,26 @@
 train:
   - name: Tevatron/colpali
+  - name: Tevatron/colpali
+  - name: Tevatron/colpali
+  - name: Tevatron/colpali
+  - name: Tevatron/colpali
+  - name: Tevatron/bge-ir
+  - name: Tevatron/pixmo-docs
+  - name: Tevatron/wiki-ss-nq-new
 
 corpus:
   - name: Tevatron/colpali-corpus
+    assets_path: null
+  - name: Tevatron/colpali-corpus
+    assets_path: null
+  - name: Tevatron/colpali-corpus
+    assets_path: null
+  - name: Tevatron/colpali-corpus
+    assets_path: null
+  - name: Tevatron/colpali-corpus
+    assets_path: null
+  - null
+  - name: Tevatron/pixmo-docs-corpus
+    assets_path: null
+  - name: Tevatron/wiki-ss-corpus-new
     assets_path: null
