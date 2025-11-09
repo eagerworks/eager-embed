@@ -1,0 +1,6 @@
+train:
+  - name: Tevatron/colpali
+
+corpus:
+  - name: Tevatron/colpali-corpus
+    assets_path: null
