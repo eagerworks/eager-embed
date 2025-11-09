@@ -15,15 +15,16 @@ dependencies = [
     "peft>=0.17.1",
     "pillow>=12.0.0",
     "flash-attn>=2.8.3",
-    "tevatron",
     "mteb>=2.1.7",
     "qwen-vl-utils>=0.0.14",
+    "qwen-omni-utils>=0.0.8",
+    "tevatron",
 ]
 
 [tool.uv.sources]
 torch = { index = "pytorch" }
 torchvision = { index = "pytorch" }
-tevatron = { git = "https://github.com/texttron/tevatron" }
+tevatron = { git = "https://github.com/eagerworks/tevatron" }
 
 [[tool.uv.index]]
 name = "pytorch"

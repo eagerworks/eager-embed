@@ -1,10 +1,6 @@
 #!/bin/bash
 
-# To limit the number of examples (useful if you have limited disk space):
-# Add --max_train_samples 10000 to limit training examples
-# Add --max_corpus_samples 50000 to limit corpus size (helps with 52GB issue)
-
-export PYTHONPATH=/mnt/data/QWEN_EMBEDDINGS/tevatron/src:$PYTHONPATH
+#export PYTHONPATH=/mnt/data/QWEN_EMBEDDINGS/tevatron/src:$PYTHONPATH
 
 deepspeed --include localhost:0 --master_port 60000 --module tevatron.retriever.driver.train_mm \
   --deepspeed ds_zero0_config.json \
@@ -29,7 +25,7 @@ deepspeed --include localhost:0 --master_port 60000 --module tevatron.retriever.
   --learning_rate 1e-4 \
   --query_max_len 512 \
   --passage_max_len 512 \
-  --num_train_epochs 1 \
+  --num_train_epochs 0.0035 \
   --logging_steps 1 \
   --overwrite_output_dir \
   --gradient_accumulation_steps 4 \
