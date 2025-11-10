@@ -19,7 +19,8 @@ corpus:
     assets_path: null
   - name: Tevatron/colpali-corpus
     assets_path: null
-  - null
+  - name: null
+    assets_path: null
   - name: Tevatron/pixmo-docs-corpus
     assets_path: null
   - name: Tevatron/wiki-ss-corpus-new
