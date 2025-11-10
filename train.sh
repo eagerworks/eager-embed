@@ -1,8 +1,6 @@
 #!/bin/bash
 
-#export PYTHONPATH=/mnt/data/QWEN_EMBEDDINGS/tevatron/src:$PYTHONPATH
-
-deepspeed --include localhost:0 --master_port 60000 --module tevatron.retriever.driver.train_mm \
+deepspeed --master_port 60000 --module tevatron.retriever.driver.train_mm \
   --deepspeed ds_zero0_config.json \
   --output_dir retriever-qwen3vl-colpali \
   --model_name_or_path Qwen/Qwen3-VL-4B-Instruct \
@@ -25,12 +23,10 @@ deepspeed --include localhost:0 --master_port 60000 --module tevatron.retriever.
   --learning_rate 1e-4 \
   --query_max_len 512 \
   --passage_max_len 512 \
-  --num_train_epochs 0.0035 \
+  --num_train_epochs 1 \
   --logging_steps 1 \
   --overwrite_output_dir \
   --gradient_accumulation_steps 4 \
   --warmup_ratio 0.005 \
   --dataloader_num_workers 4 \
   --attn_implementation flash_attention_2 \
-  #--max_train_samples 10000 \
-  #--max_corpus_samples 1000 \
