@@ -46,7 +46,6 @@ from torch.utils.data import DataLoader
 # Initialize the model
 model = Qwen3VLEmbeddingWrapper(
     model_name='retriever-qwen3vl-colpali',
-    device='cuda:0',
     dtype=torch.float16,
     image_size=784,
     use_peft=True,
@@ -105,6 +104,15 @@ print(results)
 ```
 
 For more examples, see `evaluate_mteb.py`.
+
+### Merge LORA to base model and push to HF
+
+```python
+python merge_lora_and_push.py \
+    --adapter_path run2_8x5090 \
+    --push_to_hub_id eagerworks/eager-embed-v1 \
+    --dtype float32
+```
 
 ## Model Architecture
 

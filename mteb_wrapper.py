@@ -57,6 +57,7 @@ class Qwen3VLEmbeddingWrapper(AbsEncoder):
         
         # Load processor
         self.processor = AutoProcessor.from_pretrained(model_name)
+        self.processor.tokenizer.padding_side = "left"
 
     def get_embedding(self, last_hidden_state: torch.Tensor) -> torch.Tensor:
         """Extract embeddings from last token of last hidden state."""
@@ -344,18 +345,3 @@ def get_qwen3vl_model_meta(
         public_training_code="https://github.com/illuin-tech/colpali",
         public_training_data="https://huggingface.co/datasets/vidore/colpali_train_set"
     )
-
-
-# Example usage:
-# qwen3vl_colpali_100k = get_qwen3vl_model_meta(
-#     model_name="your-username/retriever-qwen3vl-colpali-100k",
-#     revision="main",
-#     release_date="2024-11-01",
-#     n_parameters=3_000_000_000,
-#     memory_usage_mb=6000,
-#     embed_dim=2560,
-#     torch_dtype=torch.float16,
-#     use_peft=True,
-#     image_size=784,
-# )
-
