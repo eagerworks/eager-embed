@@ -10,7 +10,7 @@ def example_inference():
     
     # Initialize wrapper
     wrapper = Qwen3VLEmbeddingWrapper(
-        model_name='retriever-qwen3vl-colpali-100k',
+        model_name='./run2_8x5090',
         device='cuda:0',
         torch_dtype=torch.float16,
         image_size=784,

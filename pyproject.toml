@@ -15,16 +15,17 @@ dependencies = [
     "peft>=0.17.1",
     "pillow>=12.0.0",
     "flash-attn==2.8.2",
-    "mteb>=2.1.7",
     "qwen-vl-utils>=0.0.14",
     "qwen-omni-utils>=0.0.8",
     "tevatron",
+    "mteb",
 ]
 
 [tool.uv.sources]
 torch = { index = "pytorch" }
 torchvision = { index = "pytorch" }
 tevatron = { git = "https://github.com/eagerworks/tevatron" }
+mteb = { git = "https://github.com/eagerworks/mteb.git", branch = "feat/eagerembed" }
 
 [[tool.uv.index]]
 name = "pytorch"

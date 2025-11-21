@@ -497,7 +497,7 @@ requires-dist = [
     { name = "deepspeed", specifier = ">=0.18.1" },
     { name = "faiss-cpu", specifier = ">=1.12.0" },
     { name = "flash-attn", specifier = "==2.8.2" },
-    { name = "mteb", specifier = ">=2.1.7" },
+    { name = "mteb", git = "https://github.com/eagerworks/mteb.git?branch=feat%2Feagerembed" },
     { name = "ninja", specifier = ">=1.13.0" },
     { name = "peft", specifier = ">=0.17.1" },
     { name = "pillow", specifier = ">=12.0.0" },
@@ -981,8 +981,8 @@ wheels = [
 
 [[package]]
 name = "mteb"
-version = "2.1.14"
-source = { registry = "https://pypi.org/simple" }
+version = "2.1.17"
+source = { git = "https://github.com/eagerworks/mteb.git?branch=feat%2Feagerembed#362258d49d5bf547ea15eca5fa7992683a66bbb0" }
 dependencies = [
     { name = "datasets" },
     { name = "numpy" },
@@ -997,10 +997,6 @@ dependencies = [
     { name = "torch" },
     { name = "tqdm" },
     { name = "typing-extensions" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/50/3b/e9a752bf30d1cd057e7b1bbfa775b78f42cea4d961fe1826f7649f147111/mteb-2.1.14.tar.gz", hash = "sha256:d673825469df205ddf77efb44def538b405a417ddbdd47d059849c62e71a3271", size = 3019081, upload-time = "2025-11-16T12:26:20.417Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/99/d9/f166fa88fc1d686501a5b9f6a2db876f2aeef101962c8ae1bc60dd7747a4/mteb-2.1.14-py3-none-any.whl", hash = "sha256:0c202294a0a2472f8b2e51b65581253f5e518e0dd03563ce6046e0b0620f0178", size = 4604536, upload-time = "2025-11-16T12:26:17.989Z" },
 ]
 
 [[package]]

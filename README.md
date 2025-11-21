@@ -130,9 +130,11 @@ Apache 2.0
 
 ```bibtex
 @article{EagerEmbed,
-  title={EagerEmbed V1: Efficient Dense Embeddings},
+  title={Eager Embed V1: Multimodal Dense Embeddings for Retrieval},
   author={Juan Pablo Balarini},
-  year={2025}
+  year={2025},
+  publisher={Eagerworks},
+  url={https://github.com/eagerworks/eager-embed}
 }
 ```
 
