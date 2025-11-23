@@ -12,7 +12,7 @@ def evaluate_mteb():
     model_meta = mteb.get_model_meta('eagerworks/eager-embed-v1')
     model = model_meta.load_model()
 
-    tasks = mteb.get_benchmark("ViDoRe(v2)")
+    tasks = mteb.get_benchmark("ViDoRe(v3)")
     print(tasks)
     # Run evaluation with reduced batch size to save CUDA memory
     results = mteb.evaluate(model=model, tasks=tasks, encode_kwargs={"batch_size": 8})

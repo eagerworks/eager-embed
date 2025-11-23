@@ -479,7 +479,7 @@ dependencies = [
     { name = "deepspeed" },
     { name = "faiss-cpu" },
     { name = "flash-attn" },
-    { name = "mteb" },
+    { name = "mteb", extra = ["eager-embed"] },
     { name = "ninja" },
     { name = "peft" },
     { name = "pillow" },
@@ -497,7 +497,7 @@ requires-dist = [
     { name = "deepspeed", specifier = ">=0.18.1" },
     { name = "faiss-cpu", specifier = ">=1.12.0" },
     { name = "flash-attn", specifier = "==2.8.2" },
-    { name = "mteb", git = "https://github.com/eagerworks/mteb.git?branch=feat%2Feagerembed" },
+    { name = "mteb", extras = ["eager-embed"], git = "https://github.com/eagerworks/mteb?branch=feat%2Feagerembed" },
     { name = "ninja", specifier = ">=1.13.0" },
     { name = "peft", specifier = ">=0.17.1" },
     { name = "pillow", specifier = ">=12.0.0" },
@@ -982,7 +982,7 @@ wheels = [
 [[package]]
 name = "mteb"
 version = "2.1.17"
-source = { git = "https://github.com/eagerworks/mteb.git?branch=feat%2Feagerembed#362258d49d5bf547ea15eca5fa7992683a66bbb0" }
+source = { git = "https://github.com/eagerworks/mteb?branch=feat%2Feagerembed#33fc5b9ff3c07f0ce3589b08a4b950e94e2c496c" }
 dependencies = [
     { name = "datasets" },
     { name = "numpy" },
@@ -997,6 +997,12 @@ dependencies = [
     { name = "torch" },
     { name = "tqdm" },
     { name = "typing-extensions" },
+]
+
+[package.optional-dependencies]
+eager-embed = [
+    { name = "peft" },
+    { name = "qwen-vl-utils" },
 ]
 
 [[package]]
