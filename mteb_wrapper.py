@@ -92,7 +92,8 @@ class EagerEmbedV1Wrapper(AbsEncoder):
         if text_embeddings is not None and image_embeddings is not None:
             if len(text_embeddings) != len(image_embeddings):
                 raise ValueError(
-                    "The number of texts and images must have the same length"
+                    "This implementation of the model does not support "
+                    "unequal numbers of texts and images"
                 )
             # For multimodal inputs, concatenate or fuse embeddings
             fused_embeddings = text_embeddings + image_embeddings
@@ -112,7 +113,6 @@ class EagerEmbedV1Wrapper(AbsEncoder):
     ):
         """Encode images (documents) into embeddings."""
         from qwen_vl_utils import process_vision_info
-        import torchvision.transforms.functional as F
 
         all_embeddings: list[torch.Tensor] = []
         with torch.no_grad():
@@ -298,7 +298,7 @@ def get_eager_embed_v1_model_meta(
         modalities=["image", "text"],
         n_parameters=4_000_000_000,
         memory_usage_mb=16929,
-        max_tokens=8192,  # Adjust based on your model
+        max_tokens=262144,
         embed_dim=2560,
         license="apache-2.0",
         open_weights=True,
@@ -308,6 +308,7 @@ def get_eager_embed_v1_model_meta(
         use_instructions=True,
         training_datasets=EAGER_EMBED_V1_TRAINING_DATASETS,
         citation=EAGER_EMBED_V1_CITATION,
+        adapted_from="https://huggingface.co/Qwen/Qwen3-VL-4B-Instruct",
         public_training_code="https://github.com/eagerworks/eager-embed",
         public_training_data="https://github.com/eagerworks/eager-embed/blob/main/dataset_config.yaml"
     )

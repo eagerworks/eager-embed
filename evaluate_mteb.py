@@ -70,5 +70,5 @@ if __name__ == "__main__":
     print("\n" + "=" * 80)
     print("MTEB evaluation")
     print("=" * 80)
-    evaluate_mteb()
+    evaluate_mteb_with_custom_model()
 
