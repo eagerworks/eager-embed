@@ -1,6 +1,6 @@
 import torch
 from mteb_wrapper import EagerEmbedV1Wrapper
-
+from mteb.types import PromptType
 
 def example_inference():
     """Example of manual evaluation without MTEB tasks."""
@@ -50,8 +50,8 @@ def example_inference():
     image_loader = DataLoader(image_dataset, batch_size=2, collate_fn=collate_fn)
     
     # Get embeddings
-    query_embeddings = wrapper.get_text_embeddings(query_loader)
-    image_embeddings = wrapper.get_image_embeddings(image_loader)
+    query_embeddings = wrapper.get_text_embeddings(query_loader, prompt_type=PromptType.query)
+    image_embeddings = wrapper.get_image_embeddings(image_loader, prompt_type=PromptType.document)
     
     # Calculate similarities
     similarities = wrapper.similarity(query_embeddings, image_embeddings)

@@ -1,3 +1,9 @@
+# Relevant code:
+# https://github.com/texttron/tevatron/blob/main/examples/multimodal/qwen2.5vl/eval_vidore.py
+# mteb/models/model_implementations/jina_models.py
+# mteb/models/model_implementations/colqwen_models.py
+# mteb/models/model_implementations/colpali_models.py
+
 import logging
 from typing import Any
 
@@ -23,7 +29,7 @@ class EagerEmbedV1Wrapper(AbsEncoder):
         revision: str | None = None,
         device: str | None = None,
         image_size: int = 784,
-        use_peft: bool = True,
+        use_peft: bool = False,
         **kwargs,
     ):
         from transformers import AutoProcessor, Qwen3VLForConditionalGeneration
@@ -78,10 +84,10 @@ class EagerEmbedV1Wrapper(AbsEncoder):
         image_embeddings = None
 
         if "text" in inputs.dataset.features:
-            text_embeddings = self.get_text_embeddings(inputs, **kwargs)
+            text_embeddings = self.get_text_embeddings(inputs, prompt_type=prompt_type, **kwargs)
 
         if "image" in inputs.dataset.features:
-            image_embeddings = self.get_image_embeddings(inputs, **kwargs)
+            image_embeddings = self.get_image_embeddings(inputs, prompt_type=prompt_type, **kwargs)
 
         if text_embeddings is not None and image_embeddings is not None:
             if len(text_embeddings) != len(image_embeddings):
@@ -101,6 +107,7 @@ class EagerEmbedV1Wrapper(AbsEncoder):
     def get_image_embeddings(
         self,
         inputs: DataLoader[BatchedInput],
+        prompt_type: PromptType | None = None,
         **kwargs,
     ):
         """Encode images (documents) into embeddings."""
@@ -117,7 +124,10 @@ class EagerEmbedV1Wrapper(AbsEncoder):
                         {
                             'role': 'user',
                             'content': [
-                                {'type': 'text', 'text': ''},
+                                {
+                                    'type': 'text',
+                                    'text': ('Query: ' if prompt_type == PromptType.query else '')
+                                },
                                 {
                                     'type': 'image',
                                     'image': img,
@@ -161,6 +171,7 @@ class EagerEmbedV1Wrapper(AbsEncoder):
     def get_text_embeddings(
         self,
         inputs: DataLoader[BatchedInput],
+        prompt_type: PromptType | None = None,
          **kwargs,
     ):
         """Encode texts (queries) into embeddings."""
@@ -173,11 +184,12 @@ class EagerEmbedV1Wrapper(AbsEncoder):
                 # Create query messages
                 query_messages = []
                 for query in batch["text"]:
+                    query_prefix = ('Query: ' if prompt_type == PromptType.query else '')
                     message = [
                         {
                             'role': 'user',
                             'content': [
-                                {'type': 'text', 'text': f'Query: {query}'},
+                                {'type': 'text', 'text': f'{query_prefix}{query}'},
                             ]
                         }
                     ]
