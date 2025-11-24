@@ -28,15 +28,23 @@ def evaluate_mteb_with_custom_model():
     """MTEB evaluation with local model."""
     import torch
 
-    # Create model meta
+    # Create model meta (remote)
     model_meta = get_eager_embed_v1_model_meta(
-        model_name="./run2_8x5090",
-        revision="main",
+        model_name="eagerworks/eager-embed-v1",
+        revision="34ab386e65fea9187829bbd595b79622350c0a00",
         dtype=torch.float16,
-        # attn_implementation="flash_attention_2", # Uncomment this for faster inference
-        use_peft=True,
+        use_peft=False,
         image_size=784,
     )
+
+    # Create model meta (local)
+    # model_meta = get_eager_embed_v1_model_meta(
+    #     model_name="./run2_8x5090",
+    #     revision="main",
+    #     dtype=torch.float16,
+    #     use_peft=True,
+    #     image_size=784,
+    # )
 
     # Initialize wrapper
     model = model_meta.load_model()
