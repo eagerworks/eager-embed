@@ -1,5 +1,5 @@
 import torch
-from mteb_wrapper import Qwen3VLEmbeddingWrapper
+from mteb_wrapper import EagerEmbedV1Wrapper
 
 
 def example_inference():
@@ -9,12 +9,12 @@ def example_inference():
     from io import BytesIO
     
     # Initialize wrapper
-    wrapper = Qwen3VLEmbeddingWrapper(
-        model_name='./run2_8x5090',
+    wrapper = EagerEmbedV1Wrapper(
+        model_name='eagerworks/eager-embed-v1',
         device='cuda:0',
         torch_dtype=torch.float16,
         image_size=784,
-        use_peft=True,
+        use_peft=False,
     )
     
     # Prepare some test queries
@@ -42,7 +42,7 @@ def example_inference():
     query_dataset = Dataset.from_dict({"text": queries})
     image_dataset = Dataset.from_dict({"image": images})
     
-    # Custom collate function for PIL images
+    # Custom collate function for images
     def collate_fn(batch):
         return {"image": [item["image"] for item in batch]}
     

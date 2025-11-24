@@ -1,9 +1,12 @@
 """
-Example script showing how to use the Qwen3VL MTEB wrapper for evaluation.
+Example script showing how to use the EagerEmbedV1Wrapper MTEB wrapper for evaluation.
 """
 
+# Relevant code:
+# mteb/_create_dataloaders.py
+
 import mteb
-from mteb_wrapper import get_qwen3vl_model_meta
+from mteb_wrapper import get_eager_embed_v1_model_meta
 
 
 def evaluate_mteb():
@@ -26,13 +29,9 @@ def evaluate_mteb_with_custom_model():
     import torch
 
     # Create model meta
-    model_meta = get_qwen3vl_model_meta(
+    model_meta = get_eager_embed_v1_model_meta(
         model_name="./run2_8x5090",
         revision="main",
-        release_date="2024-11-01",
-        n_parameters=3_000_000_000,
-        memory_usage_mb=6000,
-        embed_dim=2560,
         dtype=torch.float16,
         # attn_implementation="flash_attention_2", # Uncomment this for faster inference
         use_peft=True,

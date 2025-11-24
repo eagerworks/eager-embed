@@ -14,8 +14,8 @@ from mteb.types import Array, BatchedInput, PromptType
 logger = logging.getLogger(__name__)
 
 
-class Qwen3VLEmbeddingWrapper(AbsEncoder):
-    """Wrapper for Qwen3VL single-vector embedding models."""
+class EagerEmbedV1Wrapper(AbsEncoder):
+    """Wrapper for EagerEmbed single-vector embedding models."""
 
     def __init__(
         self,
@@ -27,15 +27,15 @@ class Qwen3VLEmbeddingWrapper(AbsEncoder):
         **kwargs,
     ):
         from transformers import AutoProcessor, Qwen3VLForConditionalGeneration
-        
+
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
         self.image_size = image_size
         self.use_peft = use_peft
-        
+
         # Handle deprecated torch_dtype parameter
         if 'torch_dtype' in kwargs:
             kwargs['dtype'] = kwargs.pop('torch_dtype')
-        
+
         # Load model
         if self.use_peft:
             from peft import PeftModel, PeftConfig
@@ -51,10 +51,10 @@ class Qwen3VLEmbeddingWrapper(AbsEncoder):
                 model_name,
                 **kwargs
             )
-        
+
         self.mdl = self.mdl.to(self.device)
         self.mdl.eval()
-        
+
         # Load processor
         self.processor = AutoProcessor.from_pretrained(model_name)
         self.processor.tokenizer.padding_side = "left"
@@ -95,51 +95,24 @@ class Qwen3VLEmbeddingWrapper(AbsEncoder):
             return text_embeddings
         elif image_embeddings is not None:
             return image_embeddings
-        
+
         raise ValueError("No text or image inputs found")
 
     def get_image_embeddings(
         self,
-        images,
-        batch_size: int = 32,
+        inputs: DataLoader[BatchedInput],
         **kwargs,
     ):
         """Encode images (documents) into embeddings."""
         from qwen_vl_utils import process_vision_info
         import torchvision.transforms.functional as F
 
-        all_embeds = []
-        
-        # Create a new DataLoader with custom collate function to handle images
-        def image_collate_fn(batch):
-            """Custom collate function that keeps images as a list."""
-            collated = {}
-            for key in batch[0]:
-                collated[key] = [item[key] for item in batch]
-            return collated
-        
-        # Extract the dataset from the DataLoader and create a new one with proper collation
-        dataset = images.dataset
-        image_loader = DataLoader(
-            dataset,
-            batch_size=batch_size,
-            collate_fn=image_collate_fn,
-            shuffle=False,
-        )
-        
+        all_embeddings: list[torch.Tensor] = []
         with torch.no_grad():
-            for batch in tqdm(image_loader, desc="Encoding images"):
-                # Convert batch to PIL images if needed
-                imgs = [
-                    F.to_pil_image(b.to(self.device))
-                    if not isinstance(b, Image.Image)
-                    else b
-                    for b in batch["image"]
-                ]
-                
+            for batch in tqdm(inputs, desc="Encoding images"):
                 # Create messages for each image
                 doc_messages = []
-                for img in imgs:
+                for img in batch["image"]:
                     message = [
                         {
                             'role': 'user',
@@ -155,7 +128,7 @@ class Qwen3VLEmbeddingWrapper(AbsEncoder):
                         }
                     ]
                     doc_messages.append(message)
-                
+
                 # Prepare inputs
                 doc_texts = [
                     self.processor.apply_chat_template(
@@ -163,7 +136,7 @@ class Qwen3VLEmbeddingWrapper(AbsEncoder):
                     ) + "<|endoftext|>"
                     for msg in doc_messages
                 ]
-                
+
                 doc_image_inputs, doc_video_inputs = process_vision_info(doc_messages)
                 doc_inputs = self.processor(
                     text=doc_texts,
@@ -172,49 +145,31 @@ class Qwen3VLEmbeddingWrapper(AbsEncoder):
                     padding='longest',
                     return_tensors='pt'
                 ).to(self.device)
-                
+
                 # Get embeddings
                 output = self.mdl(**doc_inputs, return_dict=True, output_hidden_states=True)
                 embeddings = self.get_embedding(output.hidden_states[-1])
                 # Convert to float32 and ensure normalization is maintained
                 embeddings = embeddings.cpu().to(torch.float32)
                 embeddings = torch.nn.functional.normalize(embeddings, p=2, dim=-1)
-                all_embeds.append(embeddings)
-        
+                all_embeddings.append(embeddings)
+
         # Concatenate all embeddings
-        all_embeds = torch.cat(all_embeds, dim=0)
-        return all_embeds
+        return torch.cat(all_embeddings, dim=0)
+
 
     def get_text_embeddings(
         self,
-        texts,
-        batch_size: int = 32,
-        **kwargs,
+        inputs: DataLoader[BatchedInput],
+         **kwargs,
     ):
         """Encode texts (queries) into embeddings."""
         from qwen_vl_utils import process_vision_info
 
-        all_embeds = []
-        
-        # Create a new DataLoader with custom collate function to handle variable-length texts
-        def text_collate_fn(batch):
-            """Custom collate function that doesn't try to stack text strings."""
-            collated = {}
-            for key in batch[0]:
-                collated[key] = [item[key] for item in batch]
-            return collated
-        
-        # Extract the dataset from the DataLoader and create a new one with proper collation
-        dataset = texts.dataset
-        text_loader = DataLoader(
-            dataset,
-            batch_size=batch_size,
-            collate_fn=text_collate_fn,
-            shuffle=False,
-        )
-        
+        all_embeddings: list[torch.Tensor] = []
+
         with torch.no_grad():
-            for batch in tqdm(text_loader, desc="Encoding texts"):
+            for batch in tqdm(inputs, desc="Encoding texts"):
                 # Create query messages
                 query_messages = []
                 for query in batch["text"]:
@@ -227,7 +182,7 @@ class Qwen3VLEmbeddingWrapper(AbsEncoder):
                         }
                     ]
                     query_messages.append(message)
-                
+
                 # Prepare inputs
                 query_texts = [
                     self.processor.apply_chat_template(
@@ -235,7 +190,7 @@ class Qwen3VLEmbeddingWrapper(AbsEncoder):
                     ) + "<|endoftext|>"
                     for msg in query_messages
                 ]
-                
+
                 query_image_inputs, query_video_inputs = process_vision_info(query_messages)
                 query_inputs = self.processor(
                     text=query_texts,
@@ -244,18 +199,18 @@ class Qwen3VLEmbeddingWrapper(AbsEncoder):
                     padding='longest',
                     return_tensors='pt'
                 ).to(self.device)
-                
+
                 # Get embeddings
                 output = self.mdl(**query_inputs, return_dict=True, output_hidden_states=True)
                 embeddings = self.get_embedding(output.hidden_states[-1])
                 # Convert to float32 and ensure normalization is maintained
                 embeddings = embeddings.cpu().to(torch.float32)
                 embeddings = torch.nn.functional.normalize(embeddings, p=2, dim=-1)
-                all_embeds.append(embeddings)
-        
+                all_embeddings.append(embeddings)
+
         # Concatenate all embeddings
-        all_embeds = torch.cat(all_embeds, dim=0)
-        return all_embeds
+        return torch.cat(all_embeddings, dim=0)
+
 
     def get_fused_embeddings(
         self,
@@ -290,58 +245,57 @@ class Qwen3VLEmbeddingWrapper(AbsEncoder):
         )
 
 
-QWEN3VL_CITATION = """
-@article{Qwen3-VL,
-  title={Qwen3-VL: Efficient Vision-Language Models},
-  author={Qwen Team},
-  year={2024}
+EAGER_EMBED_V1_CITATION = """@article{EagerEmbed,
+  title={Eager Embed V1: Multimodal Dense Embeddings for Retrieval},
+  author={Juan Pablo Balarini},
+  year={2025},
+  publisher={Eagerworks},
+  url={https://github.com/eagerworks/eager-embed},
+}"""
+
+EAGER_EMBED_V1_TRAINING_DATASETS = {
+    "colpali",
+    "bge-ir",
+    "pixmo-docs",
+    "wiki-ss"
 }
-"""
 
 
-def get_qwen3vl_model_meta(
+def get_eager_embed_v1_model_meta(
     model_name: str,
     revision: str | None = None,
-    release_date: str = "2024-11-01",
-    n_parameters: int = 3_000_000_000,
-    memory_usage_mb: int = 6000,
-    embed_dim: int = 2560,
-    training_datasets: set[str] | None = None,
     **loader_kwargs,
 ) -> ModelMeta:
     """
-    Create a ModelMeta instance for a Qwen3VL embedding model.
-    
+    Create a ModelMeta instance for a eager-embed-v1 embedding model.
+
     Args:
         model_name: HuggingFace model name or path
         revision: Model revision/commit hash
-        release_date: Release date in YYYY-MM-DD format
         n_parameters: Number of model parameters
         memory_usage_mb: Approximate memory usage in MB
-        embed_dim: Embedding dimension
-        training_datasets: Set of training dataset names
         **loader_kwargs: Additional kwargs to pass to the loader
     """
     return ModelMeta(
-        loader=Qwen3VLEmbeddingWrapper,
+        loader=EagerEmbedV1Wrapper,
         loader_kwargs=loader_kwargs,
         name=model_name,
-        languages=["eng-Latn"],  # Add more languages if applicable
+        languages=["fra-Latn", "spa-Latn", "eng-Latn", "deu-Latn"],
         revision=revision,
-        release_date=release_date,
+        release_date='2025-11-20',
         modalities=["image", "text"],
-        n_parameters=n_parameters,
-        memory_usage_mb=memory_usage_mb,
+        n_parameters=4_000_000_000,
+        memory_usage_mb=16929,
         max_tokens=8192,  # Adjust based on your model
-        embed_dim=embed_dim,
+        embed_dim=2560,
         license="apache-2.0",
         open_weights=True,
         framework=["Tevatron"],
-        reference=f"https://huggingface.co/{model_name}",
+        reference="https://huggingface.co/eagerworks/eager-embed-v1",
         similarity_fn_name=ScoringFunction.COSINE,
         use_instructions=True,
-        training_datasets=training_datasets or set(),
-        citation=QWEN3VL_CITATION,
-        public_training_code="https://github.com/illuin-tech/colpali",
-        public_training_data="https://huggingface.co/datasets/vidore/colpali_train_set"
+        training_datasets=EAGER_EMBED_V1_TRAINING_DATASETS,
+        citation=EAGER_EMBED_V1_CITATION,
+        public_training_code="https://github.com/eagerworks/eager-embed",
+        public_training_data="https://github.com/eagerworks/eager-embed/blob/main/dataset_config.yaml"
     )
