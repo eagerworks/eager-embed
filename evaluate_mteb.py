@@ -31,7 +31,7 @@ def evaluate_mteb_with_custom_model():
     # Create model meta (remote)
     model_meta = get_eager_embed_v1_model_meta(
         model_name="eagerworks/eager-embed-v1",
-        revision="34ab386e65fea9187829bbd595b79622350c0a00",
+        revision="a6bec272729c5056e2c26618ce085205c82a3b3c",
         dtype=torch.float16,
         use_peft=False,
         image_size=784,
