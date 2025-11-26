@@ -982,7 +982,7 @@ wheels = [
 [[package]]
 name = "mteb"
 version = "2.2.2"
-source = { git = "https://github.com/eagerworks/mteb?branch=feat%2Feagerembed#8917fe8a6c06f41b5350bb29f32508bc0dfab7e9" }
+source = { git = "https://github.com/eagerworks/mteb?branch=feat%2Feagerembed#62e623e448764ef317530414499782e91da1aca3" }
 dependencies = [
     { name = "datasets" },
     { name = "numpy" },

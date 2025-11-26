@@ -15,7 +15,11 @@ def evaluate_mteb():
     model_meta = mteb.get_model_meta('eagerworks/eager-embed-v1')
     model = model_meta.load_model()
 
-    tasks = mteb.get_benchmark("ViDoRe(v3)")
+    # Get benchmarks and extract tasks from them
+    benchmarks = mteb.get_benchmarks(["ViDoRe(v2)"])
+    tasks = []
+    for benchmark in benchmarks:
+        tasks.extend(benchmark.tasks)
     print(tasks)
     # Run evaluation with reduced batch size to save CUDA memory
     results = mteb.evaluate(model=model, tasks=tasks, encode_kwargs={"batch_size": 8})
@@ -48,8 +52,16 @@ def evaluate_mteb_with_custom_model():
 
     # Initialize wrapper
     model = model_meta.load_model()
-    tasks = mteb.get_benchmark("ViDoRe(v2)")
-    print(tasks)
+
+    # Get benchmarks and extract tasks from them
+    benchmarks = mteb.get_benchmarks(["ViDoRe(v2)"])
+    print(benchmarks)
+
+    tasks = []
+    for benchmark in benchmarks:
+        tasks.extend(benchmark.tasks)
+    # tasks = mteb.get_tasks(["Vidore2ESGReportsHLRetrieval", "Vidore2BioMedicalLecturesRetrieval"])
+
     # Run evaluation with reduced batch size to save CUDA memory
     results = mteb.evaluate(model=model, tasks=tasks, encode_kwargs={"batch_size": 8})
 

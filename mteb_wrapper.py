@@ -146,34 +146,6 @@ class EagerEmbedV1Wrapper(AbsEncoder):
 
         return torch.cat(all_embeddings, dim=0)
 
-    def get_fused_embeddings(
-        self,
-        texts: list[str] | None = None,
-        images: list[Image.Image] | DataLoader | None = None,
-        *,
-        task_name: str | None = None,
-        prompt_type: PromptType | None = None,
-        batch_size: int = 32,
-        fusion_mode="sum",
-        **kwargs: Any,
-    ):
-        raise NotImplementedError(
-            "Fused embeddings are not supported yet. Please use get_text_embeddings or get_image_embeddings."
-        )
-
-    def calculate_probs(self, text_embeddings, image_embeddings):
-        """Calculate probabilities using softmax over cosine similarities."""
-        scores = torch.nn.functional.cosine_similarity(
-            text_embeddings.unsqueeze(1), image_embeddings.unsqueeze(0), dim=-1
-        )
-        return scores.softmax(dim=-1)
-
-    def similarity(self, a, b):
-        """Calculate cosine similarity between embeddings."""
-        return torch.nn.functional.cosine_similarity(
-            a.unsqueeze(1), b.unsqueeze(0), dim=-1
-        )
-
 
 EAGER_EMBED_V1_CITATION = """@article{EagerEmbed,
   title={Eager Embed V1: Multimodal Dense Embeddings for Retrieval},
