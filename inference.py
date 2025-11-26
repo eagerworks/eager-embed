@@ -3,6 +3,7 @@ from mteb_wrapper import EagerEmbedV1Wrapper
 from mteb.types import PromptType
 from transformers.utils.import_utils import is_flash_attn_2_available
 
+
 def example_inference():
     """Example of manual evaluation without MTEB tasks."""
     from PIL import Image
@@ -11,15 +12,15 @@ def example_inference():
 
     # Initialize wrapper
     wrapper = EagerEmbedV1Wrapper(
-        model_name='eagerworks/eager-embed-v1',
+        model_name="eagerworks/eager-embed-v1",
         revision="a6bec272729c5056e2c26618ce085205c82a3b3c",
-        device='cuda:0',
+        device="cuda:0",
         image_size=784,
         use_peft=False,
         torch_dtype=torch.float16,
         attn_implementation=(
             "flash_attention_2" if is_flash_attn_2_available() else None
-        )
+        ),
     )
 
     # Prepare some test queries
@@ -34,10 +35,9 @@ def example_inference():
         "https://huggingface.co/Tevatron/dse-phi3-docmatix-v2/resolve/main/meta-llama.png",
     ]
 
-    headers = {'User-Agent': 'MTEB Evaluation 1.0'}
+    headers = {"User-Agent": "MTEB Evaluation 1.0"}
     images = [
-        Image.open(BytesIO(requests.get(url, headers=headers).content))
-        for url in urls
+        Image.open(BytesIO(requests.get(url, headers=headers).content)) for url in urls
     ]
 
     # Create simple datasets (normally you'd use proper DataLoader)
@@ -55,8 +55,20 @@ def example_inference():
     image_loader = DataLoader(image_dataset, batch_size=2, collate_fn=collate_fn)
 
     # Get embeddings
-    query_embeddings = wrapper.get_text_embeddings(query_loader, prompt_type=PromptType.query)
-    image_embeddings = wrapper.get_image_embeddings(image_loader, prompt_type=PromptType.document)
+    query_embeddings = wrapper.encode(
+        query_loader,
+        task_metadata=None,
+        hf_split=None,
+        hf_subset=None,
+        prompt_type=PromptType.query,
+    )
+    image_embeddings = wrapper.encode(
+        image_loader,
+        task_metadata=None,
+        hf_split=None,
+        hf_subset=None,
+        prompt_type=PromptType.document,
+    )
 
     # Calculate similarities
     similarities = wrapper.similarity(query_embeddings, image_embeddings)
