@@ -17,7 +17,7 @@ def example_inference():
         device="cuda:0",
         image_size=784,
         use_peft=False,
-        torch_dtype=torch.float16,
+        dtype=torch.float16,
         attn_implementation=(
             "flash_attention_2" if is_flash_attn_2_available() else None
         ),

@@ -38,10 +38,6 @@ class EagerEmbedV1Wrapper(AbsEncoder):
         self.image_size = image_size
         self.use_peft = use_peft
 
-        # Handle deprecated torch_dtype parameter
-        if "torch_dtype" in kwargs:
-            kwargs["dtype"] = kwargs.pop("torch_dtype")
-
         # Load model
         if self.use_peft:
             from peft import PeftModel, PeftConfig

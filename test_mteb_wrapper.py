@@ -17,7 +17,7 @@ def test_wrapper_initialization():
         wrapper = Qwen3VLEmbeddingWrapper(
             model_name='retriever-qwen3vl-colpali',
             device='cuda:0' if torch.cuda.is_available() else 'cpu',
-            torch_dtype=torch.float16,
+            dtype=torch.float16,
             image_size=784,
             use_peft=True,
         )
