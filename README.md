@@ -72,6 +72,8 @@ similarities = model.similarity(query_embeddings, image_embeddings)
 print(similarities)
 ```
 
+For transformers usage check `inference_transformers.py`
+
 ### MTEB Evaluation
 
 ```python
