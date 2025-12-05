@@ -3,21 +3,22 @@ from transformers import AutoProcessor, Qwen3VLForConditionalGeneration
 from transformers.utils.import_utils import is_flash_attn_2_available
 from qwen_vl_utils import process_vision_info
 
-
-device = torch.device("cpu")
+MODEL_NAME = "eagerworks/eager-embed-v1"
+DEVICE = torch.device("cpu")
 if torch.cuda.is_available():
-    device = torch.device("cuda:0")
+    DEVICE = torch.device("cuda:0")
 elif torch.backends.mps.is_available():
-    device = torch.device("mps")
+    DEVICE = torch.device("mps")
+DTYPE = torch.bfloat16
 
-processor = AutoProcessor.from_pretrained("eagerworks/eager-embed-v1")
+processor = AutoProcessor.from_pretrained(MODEL_NAME)
 model = Qwen3VLForConditionalGeneration.from_pretrained(
-    "eagerworks/eager-embed-v1",
+    MODEL_NAME,
     attn_implementation=(
         "flash_attention_2" if is_flash_attn_2_available() else None
     ),
-    dtype=torch.float16
-).to(device).eval()
+    dtype=DTYPE
+).to(DEVICE).eval()
 
 # Function to Encode Message
 def encode_message(message):
@@ -31,7 +32,7 @@ def encode_message(message):
             videos=video_inputs,
             return_tensors="pt",
             padding="longest",
-        ).to(device)
+        ).to(DEVICE)
 
         model_outputs = model(**inputs, return_dict=True, output_hidden_states=True)
 
