@@ -42,6 +42,20 @@ def encode_message(message):
         return embeddings
 
 
+# Multilingual Text Retrieval
+example_query = "Query: What is the capital city of Uruguay?"
+example_text_1 = "Montevideo es la capital y la ciudad más poblada de la República Oriental del Uruguay, así como la capital del departamento homónimo"
+example_text_2 = "El río Uruguay es un río internacional que forma parte de la cuenca del Plata. Nace en Brasil, recorre unos 1.800 km y desemboca en el Río de la Plata"
+query = [{'role': 'user', 'content': [{'type': 'text', 'text': example_query}]}]
+text_1 = [{'role': 'user', 'content': [{'type': 'text', 'text': example_text_1}]}]
+text_2 = [{'role': 'user', 'content': [{'type': 'text', 'text': example_text_2}]}]
+
+sim1 = torch.cosine_similarity(encode_message(query), encode_message(text_1))
+sim2 = torch.cosine_similarity(encode_message(query), encode_message(text_2))
+
+print("Similarities text:", sim1.item(), sim2.item())
+
+
 # Image Document Retrieval (Image, Chart, PDF)
 MAX_IMAGE_SIZE = 784
 example_query = 'Query: Where can we find the animal llama?'
@@ -54,4 +68,4 @@ image_2 = [{'role': 'user', 'content': [{'type': 'image', 'image': example_image
 sim1 = torch.cosine_similarity(encode_message(query), encode_message(image_1))
 sim2 = torch.cosine_similarity(encode_message(query), encode_message(image_2))
 
-print("Similarities:", sim1.item(), sim2.item())
+print("Similarities image:", sim1.item(), sim2.item())
