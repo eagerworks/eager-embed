@@ -36,76 +36,34 @@ Configure your training data in `dataset_config.yaml`.
 
 ### Basic Embedding Extraction
 
-```python
-import torch
-from mteb_wrapper import Qwen3VLEmbeddingWrapper
-from PIL import Image
-from datasets import Dataset
-from torch.utils.data import DataLoader
+With MTEB wrapper:
+Check [inference_mteb.py](inference_mteb.py)
 
-# Initialize the model
-model = Qwen3VLEmbeddingWrapper(
-    model_name='retriever-qwen3vl-colpali',
-    dtype=torch.float16,
-    image_size=784,
-    use_peft=True,
-)
-
-# Encode text queries
-queries = ["What is a llama?", "Show me mountain landscapes"]
-query_dataset = Dataset.from_dict({"text": queries})
-query_loader = DataLoader(query_dataset, batch_size=2)
-query_embeddings = model.get_text_embeddings(query_loader)
-
-# Encode images
-images = [Image.open("image1.jpg"), Image.open("image2.jpg")]
-image_dataset = Dataset.from_dict({"image": images})
-image_loader = DataLoader(
-    image_dataset, 
-    batch_size=2,
-    collate_fn=lambda batch: {"image": [item["image"] for item in batch]}
-)
-image_embeddings = model.get_image_embeddings(image_loader)
-
-# Calculate similarities
-similarities = model.similarity(query_embeddings, image_embeddings)
-print(similarities)
-```
-
-For transformers usage check `inference_transformers.py`
+With Transformers:
+Check [inference_transformers.py](inference_transformers.py)
 
 ### MTEB Evaluation
 
 ```python
-import torch
 import mteb
-from mteb_wrapper import get_qwen3vl_model_meta
 
-# Create model metadata
-model_meta = get_qwen3vl_model_meta(
-    model_name="./retriever-qwen3vl-colpali",
-    revision="main",
-    release_date="2024-11-01",
-    n_parameters=3_000_000_000,
-    memory_usage_mb=6000,
-    embed_dim=2560,
-    dtype=torch.float16,
-    use_peft=True,
-    image_size=784,
-)
-
-# Load and evaluate
+model_meta = mteb.get_model_meta('eagerworks/eager-embed-v1')
 model = model_meta.load_model()
-tasks = mteb.get_benchmark("ViDoRe(v2)")
-results = mteb.evaluate(
-    model=model, 
-    tasks=tasks, 
-    encode_kwargs={"batch_size": 8}
-)
+
+# Get benchmarks and extract tasks from them
+benchmarks = mteb.get_benchmarks(["ViDoRe(v2)"])
+tasks = []
+for benchmark in benchmarks:
+    tasks.extend(benchmark.tasks)
+print(tasks)
+# Run evaluation with reduced batch size to save CUDA memory
+results = mteb.evaluate(model=model, tasks=tasks, encode_kwargs={"batch_size": 8})
+
+print("Evaluation complete!")
 print(results)
 ```
 
-For more examples, see `evaluate_mteb.py`.
+For more examples, see [evaluate_mteb.py](evaluate_mteb.py)
 
 ### Merge LORA to base model and push to HF
 
